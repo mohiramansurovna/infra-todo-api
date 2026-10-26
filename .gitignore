@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Environment files (secrets)
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+
+# Test coverage
+coverage/
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+*.tfplan
+.terraformrc
+terraform.rc
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
