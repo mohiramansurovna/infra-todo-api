@@ -1,0 +1,80 @@
+name: Deploy
+
+on:
+    push:
+        branches:
+            - main
+
+permissions:
+    id-token: write
+    contents: read
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 11
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: pnpm
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Lint
+              run: pnpm lint
+
+            - name: Build
+              run: pnpm build
+
+            - name: Package
+              run: |
+                  pnpm prune --prod
+                  tar -czf app.tar.gz dist node_modules package.json
+
+            - name: Debug OIDC claims
+              run: |
+                  TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r .value)
+                  echo "$TOKEN" | cut -d. -f2 | base64 -d 2>/dev/null | jq '{sub, aud}'
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+                  aws-region: us-east-1
+
+            - name: Upload to S3
+              run: aws s3 cp app.tar.gz "s3://${{ vars.ARTIFACT_BUCKET }}/releases/${{ github.sha }}.tar.gz"
+
+            - name: Deploy on EC2
+              run: |
+                  COMMANDS=$(jq -n --arg b "${{ vars.ARTIFACT_BUCKET }}" --arg k "releases/${{ github.sha }}.tar.gz" '[
+                    "set -e",
+                    "aws s3 cp s3://\($b)/\($k) /tmp/app.tar.gz --region us-east-1",
+                    "rm -rf /opt/todo-api/dist /opt/todo-api/node_modules",
+                    "tar -xzf /tmp/app.tar.gz -C /opt/todo-api",
+                    "chown -R todoapp:todoapp /opt/todo-api",
+                    "systemctl restart todo-api"
+                  ]')
+
+                  COMMAND_ID=$(aws ssm send-command \
+                    --instance-ids "${{ vars.INSTANCE_ID }}" \
+                    --document-name "AWS-RunShellScript" \
+                    --parameters "{\"commands\":$COMMANDS}" \
+                    --query "Command.CommandId" --output text)
+
+                  aws ssm wait command-executed \
+                    --command-id "$COMMAND_ID" \
+                    --instance-id "${{ vars.INSTANCE_ID }}"
+
+                  echo "Deploy finished: $COMMAND_ID"

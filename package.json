@@ -1,42 +1,47 @@
 {
-  "name": "infra-todo-api",
-  "version": "1.0.0",
-  "description": "",
-  "main": "dist/index.js",
-  "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "prepare": "husky"
-  },
-  "lint-staged": {
-    "*.ts": "eslint --fix"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devEngines": {
-    "packageManager": {
-      "name": "pnpm",
-      "version": "11.20.0",
-      "onFail": "download"
+    "name": "infra-todo-api",
+    "version": "1.0.0",
+    "description": "",
+    "main": "dist/index.js",
+    "scripts": {
+        "dev": "tsx watch --env-file=.env src/index.ts",
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "lint": "eslint .",
+        "typecheck": "tsc --noEmit",
+        "prepare": "husky"
+    },
+    "lint-staged": {
+        "*.ts": "eslint --fix"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devEngines": {
+        "packageManager": {
+            "name": "pnpm",
+            "version": "11.20.0",
+            "onFail": "download"
+        }
+    },
+    "type": "module",
+    "devDependencies": {
+        "@commitlint/cli": "^21.2.4",
+        "@commitlint/config-conventional": "^21.2.4",
+        "@eslint/js": "^10.0.1",
+        "@types/express": "^5.0.6",
+        "@types/node": "^26.6.5",
+        "eslint": "^10.13.0",
+        "globals": "^17.13.0",
+        "husky": "^9.1.7",
+        "lint-staged": "^17.6.0",
+        "tsx": "^4.23.15",
+        "typescript": "^6.0.3",
+        "typescript-eslint": "^8.72.0"
+    },
+    "dependencies": {
+        "@aws-sdk/client-dynamodb": "^3.1156.0",
+        "@aws-sdk/lib-dynamodb": "^3.1156.0",
+        "express": "^5.3.0"
     }
-  },
-  "type": "module",
-  "devDependencies": {
-    "@commitlint/cli": "^21.2.4",
-    "@commitlint/config-conventional": "^21.2.4",
-    "@eslint/js": "^10.0.1",
-    "@types/express": "^5.0.6",
-    "@types/node": "^26.6.5",
-    "eslint": "^10.13.0",
-    "globals": "^17.13.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^17.6.0",
-    "tsx": "^4.23.15",
-    "typescript": "^6.0.3",
-    "typescript-eslint": "^8.72.0"
-  }
 }
