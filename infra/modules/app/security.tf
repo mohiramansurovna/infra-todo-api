@@ -1,7 +1,7 @@
 resource "aws_security_group" "alb" {
   name        = "${local.name}-alb-sg"
   description = "Load balancer: HTTP from the internet"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = var.vpc_id
 
   tags = { Name = "${local.name}-alb-sg" }
 }
@@ -23,7 +23,7 @@ resource "aws_vpc_security_group_egress_rule" "alb_all" {
 resource "aws_security_group" "ec2" {
   name        = "${local.name}-ec2-sg"
   description = "App server: HTTP only from the load balancer"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = var.vpc_id
 
   tags = { Name = "${local.name}-ec2-sg" }
 }

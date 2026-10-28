@@ -52,7 +52,7 @@ resource "aws_iam_role_policy" "github_deploy" {
         Effect = "Allow"
         Action = ["ssm:SendCommand"]
         Resource = [
-          "arn:aws:ssm:us-east-1::document/AWS-RunShellScript",
+          "arn:aws:ssm:${data.aws_region.current.region}::document/AWS-RunShellScript",
           aws_instance.app.arn,
         ]
       },

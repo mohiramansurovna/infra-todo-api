@@ -1,3 +1,14 @@
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+data "aws_region" "current" {}
+
+locals {
+  name = "infra-todo-${var.environment}"
+  azs  = slice(data.aws_availability_zones.available.names, 0, 2)
+}
+
 resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
@@ -79,7 +90,7 @@ resource "aws_route_table_association" "private" {
 
 resource "aws_vpc_endpoint" "dynamodb" {
   vpc_id            = aws_vpc.main.id
-  service_name      = "com.amazonaws.us-east-1.dynamodb"
+  service_name      = "com.amazonaws.${data.aws_region.current.region}.dynamodb"
   vpc_endpoint_type = "Gateway"
   route_table_ids   = [aws_route_table.private.id]
 

@@ -11,7 +11,7 @@ data "aws_ami" "al2023" {
 resource "aws_instance" "app" {
   ami                         = data.aws_ami.al2023.id
   instance_type               = "t3.micro"
-  subnet_id                   = aws_subnet.private.id
+  subnet_id                   = var.private_subnet_id
   vpc_security_group_ids      = [aws_security_group.ec2.id]
   iam_instance_profile        = aws_iam_instance_profile.ec2.name
   associate_public_ip_address = false
@@ -39,7 +39,7 @@ resource "aws_instance" "app" {
     WorkingDirectory=/opt/todo-api
     ExecStart=/usr/bin/node dist/index.js
     Environment=PORT=80
-    Environment=AWS_REGION=us-east-1
+    Environment=AWS_REGION=${data.aws_region.current.region}
     Environment=TABLE_NAME=${aws_dynamodb_table.todos.name}
     AmbientCapabilities=CAP_NET_BIND_SERVICE
     Restart=always
@@ -54,11 +54,6 @@ resource "aws_instance" "app" {
   EOF
 
   user_data_replace_on_change = true
-
-  depends_on = [
-    aws_route_table_association.private,
-    aws_nat_gateway.main,
-  ]
 
   tags = { Name = "${local.name}-app" }
 }
